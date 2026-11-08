@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Самостоятельная работа</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #d9c8a9;
+            min-height: 100vh;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            overflow-x: hidden;
+        }
+        main { width: 100%; height: 100%; display: flex; }
+        .scene-wrapper {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            width: calc(30% + 405px);
+            height: 100vh;
+            margin-left: 0;
+            flex-shrink: 0;
+            position: relative;
+            background: #d9c8a9;
+        }
+        .svg-container {
+            width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #d9c8a9;
+            position: relative;
+        }
+        svg { display: block; width: 100%; height: 100%; background: transparent; }
+        .flower-emoji { font-size: 5em; line-height: 1; dominant-baseline: central; text-anchor: middle; }
+        .desk-group { cursor: default; }
+        #clock-overlay {
+            position: absolute; left: 4.57%; top: 10%;
+            width: 18%; aspect-ratio: 1 / 1;
+            cursor: pointer; z-index: 20;
+        }
+        #time-question {
+            position: absolute; top: calc(-35% + 6px); left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 900;
+            font-size: clamp(12px, 1.8vw, 22px);
+            color: #cc0000;
+            text-shadow: 0 0 8px #ffaaaa;
+            opacity: 0; transition: opacity 0.15s ease;
+            white-space: nowrap; pointer-events: none;
+            text-align: center;
+        }
+        #time-question.show { opacity: 1; }
+        #clock-face {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: #fcf8ed;
+            border: max(3px, 0.6vw) solid #3d2b1b;
+            box-shadow: 0 4px 4px #00000040;
+            position: relative;
+        }
+        .clock-number {
+            position: absolute;
+            font-size: max(8px, 1vw);
+            font-weight: bold;
+            color: #1f2a1e;
+            text-align: center;
+            transform: translate(-50%, -50%);
+        }
+        .clock-hand {
+            position: absolute;
+            bottom: 50%; left: 50%;
+            transform-origin: bottom center;
+            border-radius: 2px;
+        }
+        .right-frame {
+            margin: 40px auto;
+            width: calc(30% + 265px);
+            height: calc(100vh - 80px);
+            background-color: #fdfbf7;
+            border-radius: 4px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-gutter: stable;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .bottom-instruction {
+            position: absolute; bottom: 24px; left: 0;
+            width: 100%; text-align: center;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: clamp(16px, 2.2vw, 22px);
+            letter-spacing: -0.5px;
+            pointer-events: none;
+            z-index: 15;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        h1.main-title {
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            color: #3e2723;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: clamp(18px, 2.5vw, 28px);
+        }
+        .motto {
+            font-family: Arial, sans-serif;
+            font-weight: normal;
+            font-style: normal;
+            color: #00008B;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: clamp(22px, 2.8vw, 32px);
+            line-height: 1.4;
+        }
+        .progress-container { width: 100%; margin-bottom: 15px; text-align: center; }
+        .progress-text {
+            font-family: Arial, sans-serif;
+            font-weight: 900;
+            color: #800020;
+            margin-bottom: 8px;
+            font-size: clamp(20px, 2.5vw, 26px);
+        }
+        .progress-bar-bg {
+            width: 100%; height: 10px;
+            background-color: #e0d0b0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .task-section { display: none; width: 100%; animation: fadeIn 0.5s; }
+        .task-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .task-title {
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            color: #3e2723;
+            font-size: clamp(16px, 2.2vw, 24px);
+            margin-bottom: 15px;
+            border-bottom: 2px solid #d9c8a9;
+            padding-bottom: 5px;
+        }
+        .task-content {
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            color: #3e2723;
+            font-size: clamp(14px, 1.8vw, 20px);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .task-content p {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .line-input {
+            border: none;
+            border-bottom: 2px solid #3e2723;
+            background: transparent;
+            text-align: left;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            color: #3e2723;
+            font-size: clamp(16px, 2vw, 22px);
+            outline: none;
+            padding: 2px 5px;
+            border-radius: 0;
+            cursor: text;
+            flex: 1;
+            min-width: 200px;
+            max-width: 600px;
+        }
+        .line-input-short {
+            flex: 0 0 55px !important;
+            min-width: 55px !important;
+            max-width: 55px !important;
+            text-align: center;
+        }
+        .line-input:focus {
+            border-bottom-color: #cc0000;
+            background-color: rgba(255,255,255,0.5);
+        }
+        .btn {
+            background-color: #3e2723;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        .btn:hover { background-color: #5a3b35; }
+        .btn:disabled { background-color: #ccc; cursor: not-allowed; }
+        .feedback-msg {
+            margin-top: 10px;
+            font-weight: 900;
+            font-family: Arial, sans-serif;
+            min-height: 30px;
+            font-size: clamp(22px, 3vw, 28px);
+            white-space: normal;
+            text-align: center;
+        }
+        .error { color: #cc0000; }
+        .success { color: #2e7d32; }
+        .math-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .column-calc {
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: clamp(20px, 2.5vw, 28px);
+            color: #3e2723;
+            line-height: 1.3;
+            text-align: right;
+            width: 130px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            vertical-align: top;
+        }
+        .calc-input {
+            border: 2px solid #d9c8a9;
+            background: #fff;
+            text-align: right;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: clamp(20px, 2.5vw, 28px);
+            color: #3e2723;
+            width: 100%;
+            height: 32px;
+            padding: 2px 0;
+            outline: none;
+            cursor: text;
+            border-radius: 3px;
+            transition: all 0.2s;
+            letter-spacing: 1ch;
+            line-height: 28px;
+            display: block;
+            box-sizing: border-box;
+            margin: 0;
+        }
+        .calc-input:hover { background: #fff9e6; border-color: #3e2723; }
+        .calc-input:focus {
+            background-color: #fff;
+            border-color: #cc0000;
+            box-shadow: 0 0 0 2px rgba(204, 0, 0, 0.2);
+        }
+        .calc-line {
+            border-top: 2px solid #3e2723;
+            margin: 1px 0;
+            width: 100%;
+            height: 2px;
+        }
+        .check-block { flex: 1; min-width: 200px; }
+        .check-label {
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            color: #3e2723;
+            font-size: 16px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .order-box {
+            width: 24px; height: 24px;
+            border: 1.5px solid #3e2723;
+            background: #fff;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            color: #cc0000;
+            margin: 0 auto 2px auto;
+            display: block;
+            outline: none;
+            border-radius: 3px;
+        }
+        .order-box:focus { border-color: #cc0000; background-color: #fff5f5; }
+        .expr-container {
+            display: inline-flex;
+            align-items: flex-end;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: clamp(16px, 2vw, 20px);
+            color: #3e2723;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .op-group {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 3px;
+            vertical-align: bottom;
+        }
+        .op-symbol { display: block; margin-top: 2px; }
+        .result-box {
+            text-align: center;
+            padding: 20px;
+            border: 3px dashed #3e2723;
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.7);
+            position: relative;
+            z-index: 10;
+            width: 100%;
+        }
+        .res-name {
+            font-size: clamp(18px, 2.5vw, 24px);
+            font-weight: bold;
+            color: #3e2723;
+            margin-bottom: 15px;
+        }
+        .res-grade-text {
+            color: #800000;
+            font-weight: bold;
+            font-size: clamp(32px, 5vw, 48px);
+            margin: 10px 0;
+        }
+        .res-correct-text {
+            color: #cc0000;
+            font-weight: bold;
+            font-size: clamp(18px, 2.5vw, 24px);
+            margin: 10px 0;
+        }
+        .res-motivation-text {
+            color: #006400;
+            font-weight: bold;
+            font-size: clamp(16px, 2.2vw, 22px);
+            margin: 15px 0;
+            line-height: 1.4;
+        }
+        .final-warning {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #cc0000;
+            font-weight: bold;
+        }
+        .confetti-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 100;
+        }
+        .flower-particle {
+            position: absolute;
+            bottom: -30px;
+            font-size: 24px;
+            animation: floatUp 5s linear forwards;
+            opacity: 0.9;
+            will-change: transform, opacity;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-110vh) rotate(720deg); opacity: 0; }
+        }
+        .teacher-emoji {
+            text-align: center;
+            font-size: 16em;
+            line-height: 0.75;
+            user-select: none;
+            opacity: 0.9;
+            pointer-events: none;
+            margin-top: 40px;
+        }
+        #page-intro {
+            position: static !important;
+        }
+        #page-intro .teacher-emoji {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 0;
+        }
+        @media screen and (max-width: 1024px) {
+            .scene-wrapper { width: 40%; }
+            .right-frame { width: 55%; margin: 40px auto; }
+        }
+        @media screen and (max-width: 768px) {
+            body { flex-direction: column; overflow-y: auto; height: auto; }
+            .scene-wrapper { width: 100%; height: 40vh; flex-shrink: 1; }
+            .right-frame {
+                position: relative; top: 0; bottom: 0; right: 0;
+                width: 100%; height: auto; min-height: 60vh;
+                margin: 0; padding: 15px;
+            }
+            .bottom-instruction { display: none; }
+            .math-row { flex-direction: column; gap: 20px; }
+            .teacher-emoji {
+                position: relative;
+                bottom: auto;
+                transform: none;
+                left: auto;
+                font-size: 10em;
+                margin-top: 30px;
+                pointer-events: auto;
+            }
+        }
+        @media screen and (max-width: 480px) {
+            .scene-wrapper { height: 30vh; }
+            .btn { width: 100%; margin-right: 0; margin-bottom: 10px; }
+            .expr-container { font-size: 14px; }
+            .order-box { width: 20px; height: 20px; font-size: 12px; }
+        }
+        @media screen and (max-width: 360px) {
+            .right-frame { padding: 10px; }
+            h1.main-title { font-size: 18px; }
+        }
+        @media screen and (min-height: 900px) and (max-width: 1024px) {
+            .scene-wrapper { height: 50vh; }
+        }
+        @media screen and (max-height: 500px) and (orientation: landscape) {
+            body { flex-direction: row; }
+            .scene-wrapper { width: 30%; height: 100vh; }
+            .right-frame {
+                position: absolute; top: 10px; bottom: 10px; right: 10px;
+                width: 65%; height: calc(100vh - 20px); margin: 0;
+            }
+            .bottom-instruction { display: none; }
+            .teacher-emoji { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="scene-wrapper">
+            <div class="svg-container">
+                <svg viewBox="0 0 700 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0" y="0" width="700" height="280" fill="#e8dec6" />
+                    <rect x="0" y="280" width="700" height="120" fill="#b5916a" />
+                    <rect x="0" y="280" width="700" height="120" fill="url(#floorPattern)" />
+                    <defs>
+                        <pattern id="floorPattern" width="60" height="120" patternUnits="userSpaceOnUse">
+                            <rect width="60" height="120" fill="#b5916a" />
+                            <rect x="0" y="0" width="58" height="120" fill="#a8835e" />
+                            <line x1="0" y1="0" x2="0" y2="120" stroke="#8b6f4e" stroke-width="1" />
+                        </pattern>
+                        <filter id="clockShadow" x="-10%" y="-10%" width="130%" height="130%">
+                            <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#00000040" />
+                        </filter>
+                        <radialGradient id="boardGrad" cx="30%" cy="40%" r="70%">
+                            <stop offset="0%" stop-color="#2d5a44" />
+                            <stop offset="100%" stop-color="#143024" />
+                        </radialGradient>
+                    </defs>
+                    <rect x="180" y="30" width="340" height="130" rx="12" ry="12" fill="#1e3a2f" stroke="#5f7a5a" stroke-width="6" />
+                    <rect x="180" y="30" width="340" height="130" rx="12" ry="12" fill="url(#boardGrad)" />
+                    <text x="350" y="55" fill="#ffffff" font-weight="bold" font-size="16" letter-spacing="3" text-anchor="middle" font-family="'Segoe UI', sans-serif">Самостоятельная работа.</text>
+                    <rect x="230" y="165" width="240" height="8" rx="4" fill="#d4b48c" />
+                    <g class="desk-group" transform="translate(120, 270)"><rect x="-40" y="-10" width="80" height="30" rx="4" fill="#b58b5a" stroke="#6f5437" stroke-width="2" /><rect x="-44" y="-16" width="88" height="10" rx="4" fill="#dab07c" /><rect x="-32" y="20" width="8" height="14" fill="#4d3a25" /><rect x="24" y="20" width="8" height="14" fill="#4d3a25" /><g transform="translate(0, 35)"><rect x="-18" y="-20" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><rect x="-18" y="-12" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><line x1="-16" y1="-20" x2="-16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="16" y1="-20" x2="16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><rect x="-16" y="0" width="32" height="8" rx="2" fill="#6b4f32" stroke="#4d3a25" stroke-width="1.5" /><line x1="-14" y1="8" x2="-14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="14" y1="8" x2="14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /></g></g>
+                    <g class="desk-group" transform="translate(280, 270)"><rect x="-40" y="-10" width="80" height="30" rx="4" fill="#b58b5a" stroke="#6f5437" stroke-width="2" /><rect x="-44" y="-16" width="88" height="10" rx="4" fill="#dab07c" /><rect x="-32" y="20" width="8" height="14" fill="#4d3a25" /><rect x="24" y="20" width="8" height="14" fill="#4d3a25" /><g transform="translate(0, 35)"><rect x="-18" y="-20" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><rect x="-18" y="-12" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><line x1="-16" y1="-20" x2="-16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="16" y1="-20" x2="16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><rect x="-16" y="0" width="32" height="8" rx="2" fill="#6b4f32" stroke="#4d3a25" stroke-width="1.5" /><line x1="-14" y1="8" x2="-14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="14" y1="8" x2="14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /></g></g>
+                    <g class="desk-group" transform="translate(440, 270)"><rect x="-40" y="-10" width="80" height="30" rx="4" fill="#b58b5a" stroke="#6f5437" stroke-width="2" /><rect x="-44" y="-16" width="88" height="10" rx="4" fill="#dab07c" /><rect x="-32" y="20" width="8" height="14" fill="#4d3a25" /><rect x="24" y="20" width="8" height="14" fill="#4d3a25" /><g transform="translate(0, 35)"><rect x="-18" y="-20" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><rect x="-18" y="-12" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><line x1="-16" y1="-20" x2="-16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="16" y1="-20" x2="16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><rect x="-16" y="0" width="32" height="8" rx="2" fill="#6b4f32" stroke="#4d3a25" stroke-width="1.5" /><line x1="-14" y1="8" x2="-14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="14" y1="8" x2="14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /></g></g>
+                    <g class="desk-group" transform="translate(600, 270)"><rect x="-40" y="-10" width="80" height="30" rx="4" fill="#b58b5a" stroke="#6f5437" stroke-width="2" /><rect x="-44" y="-16" width="88" height="10" rx="4" fill="#dab07c" /><rect x="-32" y="20" width="8" height="14" fill="#4d3a25" /><rect x="24" y="20" width="8" height="14" fill="#4d3a25" /><g transform="translate(0, 35)"><rect x="-18" y="-20" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><rect x="-18" y="-12" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><line x1="-16" y1="-20" x2="-16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="16" y1="-20" x2="16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><rect x="-16" y="0" width="32" height="8" rx="2" fill="#6b4f32" stroke="#4d3a25" stroke-width="1.5" /><line x1="-14" y1="8" x2="-14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="14" y1="8" x2="14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /></g></g>
+                    <g class="desk-group" transform="translate(120, 330)"><rect x="-40" y="-10" width="80" height="30" rx="4" fill="#b58b5a" stroke="#6f5437" stroke-width="2" /><rect x="-44" y="-16" width="88" height="10" rx="4" fill="#dab07c" /><rect x="-32" y="20" width="8" height="14" fill="#4d3a25" /><rect x="24" y="20" width="8" height="14" fill="#4d3a25" /><g transform="translate(0, 35)"><rect x="-18" y="-20" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><rect x="-18" y="-12" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><line x1="-16" y1="-20" x2="-16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="16" y1="-20" x2="16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><rect x="-16" y="0" width="32" height="8" rx="2" fill="#6b4f32" stroke="#4d3a25" stroke-width="1.5" /><line x1="-14" y1="8" x2="-14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="14" y1="8" x2="14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /></g></g>
+                    <g class="desk-group" transform="translate(280, 330)"><rect x="-40" y="-10" width="80" height="30" rx="4" fill="#b58b5a" stroke="#6f5437" stroke-width="2" /><rect x="-44" y="-16" width="88" height="10" rx="4" fill="#dab07c" /><rect x="-32" y="20" width="8" height="14" fill="#4d3a25" /><rect x="24" y="20" width="8" height="14" fill="#4d3a25" /><g transform="translate(0, 35)"><rect x="-18" y="-20" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><rect x="-18" y="-12" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><line x1="-16" y1="-20" x2="-16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="16" y1="-20" x2="16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><rect x="-16" y="0" width="32" height="8" rx="2" fill="#6b4f32" stroke="#4d3a25" stroke-width="1.5" /><line x1="-14" y1="8" x2="-14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="14" y1="8" x2="14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /></g></g>
+                    <g class="desk-group" transform="translate(440, 330)"><rect x="-40" y="-10" width="80" height="30" rx="4" fill="#b58b5a" stroke="#6f5437" stroke-width="2" /><rect x="-44" y="-16" width="88" height="10" rx="4" fill="#dab07c" /><rect x="-32" y="20" width="8" height="14" fill="#4d3a25" /><rect x="24" y="20" width="8" height="14" fill="#4d3a25" /><g transform="translate(0, 35)"><rect x="-18" y="-20" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><rect x="-18" y="-12" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><line x1="-16" y1="-20" x2="-16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="16" y1="-20" x2="16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><rect x="-16" y="0" width="32" height="8" rx="2" fill="#6b4f32" stroke="#4d3a25" stroke-width="1.5" /><line x1="-14" y1="8" x2="-14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="14" y1="8" x2="14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /></g></g>
+                    <g class="desk-group" transform="translate(600, 330)"><rect x="-40" y="-10" width="80" height="30" rx="4" fill="#b58b5a" stroke="#6f5437" stroke-width="2" /><rect x="-44" y="-16" width="88" height="10" rx="4" fill="#dab07c" /><rect x="-32" y="20" width="8" height="14" fill="#4d3a25" /><rect x="24" y="20" width="8" height="14" fill="#4d3a25" /><g transform="translate(0, 35)"><rect x="-18" y="-20" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><rect x="-18" y="-12" width="36" height="4" rx="1" fill="#8b6f4e" stroke="#4d3a25" stroke-width="1" /><line x1="-16" y1="-20" x2="-16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="16" y1="-20" x2="16" y2="0" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><rect x="-16" y="0" width="32" height="8" rx="2" fill="#6b4f32" stroke="#4d3a25" stroke-width="1.5" /><line x1="-14" y1="8" x2="-14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /><line x1="14" y1="8" x2="14" y2="13" stroke="#4d3a25" stroke-width="2.5" stroke-linecap="round" /></g></g>
+                    <text x="40" y="360" font-size="5em" class="flower-emoji">🪴</text>
+                    <text x="660" y="360" font-size="5em" class="flower-emoji">🪴</text>
+                </svg>
+                <div id="clock-overlay">
+                    <div id="time-question">Который час?</div>
+                    <div id="clock-face">
+                        <div class="clock-number" style="top: 8%; left: 50%;">12</div>
+                        <div class="clock-number" style="top: 13.6%; left: 71%;">1</div>
+                        <div class="clock-number" style="top: 29%; left: 86.4%;">2</div>
+                        <div class="clock-number" style="top: 50%; left: 92%;">3</div>
+                        <div class="clock-number" style="top: 71%; left: 86.4%;">4</div>
+                        <div class="clock-number" style="top: 86.4%; left: 71%;">5</div>
+                        <div class="clock-number" style="top: 92%; left: 50%;">6</div>
+                        <div class="clock-number" style="top: 86.4%; left: 29%;">7</div>
+                        <div class="clock-number" style="top: 71%; left: 13.6%;">8</div>
+                        <div class="clock-number" style="top: 50%; left: 8%;">9</div>
+                        <div class="clock-number" style="top: 29%; left: 13.6%;">10</div>
+                        <div class="clock-number" style="top: 13.6%; left: 29%;">11</div>
+                        <div id="hour-hand" class="clock-hand" style="width: max(3px, 0.4vw); height: 30%; background: #2a3a2a; transform: translateX(-50%) rotate(30deg);"></div>
+                        <div id="minute-hand" class="clock-hand" style="width: max(2px, 0.3vw); height: 45%; background: #3d3d3d; transform: translateX(-50%) rotate(120deg);"></div>
+                        <div id="second-hand" class="clock-hand" style="width: max(1px, 0.15vw); height: 50%; background: #b33e3e; transform: translateX(-50%) rotate(200deg);"></div>
+                        <div style="position: absolute; top: 50%; left: 50%; width: max(6px, 0.8vw); height: max(6px, 0.8vw); background: #1f2a1e; border: max(1px, 0.15vw) solid #fcf8ed; border-radius: 50%; transform: translate(-50%, -50%);"></div>
+                    </div>
+                </div>
+                <div class="bottom-instruction">Нажми на часы и ответь на вопрос.</div>
+            </div>
+        </div>
+
+        <section class="right-frame" aria-label="Рабочая область самостоятельной работы">
+            <div id="confetti-layer" class="confetti-layer"></div>
+            <div id="page-intro" class="task-section active">
+                <h1 class="main-title">Самостоятельная работа</h1>
+                <p class="motto">Мы внимательные, смелые, умные — <br>С математикой мы самые дружные!</p>
+                <div class="progress-container">
+                    <div class="progress-text">Прогресс выполнения: <span id="progress-count">0</span>/8</div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+                </div>
+                <div class="task-content">
+                    <label for="student-name">Регистрация ученика:</label><br>
+                    <input type="text" id="student-name" placeholder="Фамилия, имя" autocomplete="off" style="width: 100%; padding: 10px; border: 2px solid #d9c8a9; border-radius: 4px; font-family: Arial; font-weight: bold; color: #3e2723; font-size: clamp(18px, 2.5vw, 24px);">
+                    <div id="name-error" class="feedback-msg error"></div>
+                </div>
+                <button class="btn" onclick="startWork()">Начать решать</button>
+                <div class="teacher-emoji">👩🏻‍🏫</div>
+            </div>
+
+            <div id="page-task1" class="task-section">
+                <h2 class="task-title">Задание 1. Тема: «Сочетательное свойство сложения»</h2>
+                <div class="task-content">
+                    <p>Сгруппируй парами удобные числа, взяв их в скобки. Запиши решение и ответ.</p>
+                    <p>215+196+385= <input type="text" class="line-input" id="t1-q1" autocomplete="off"></p>
+                    <p>91+532+109+68= <input type="text" class="line-input" id="t1-q2" autocomplete="off"></p>
+                    <p>29+498+56+2+271= <input type="text" class="line-input" id="t1-q3" autocomplete="off"></p>
+                    <p>124+118+76+107+82= <input type="text" class="line-input" id="t1-q4" autocomplete="off"></p>
+                </div>
+                <div id="fb-task1" class="feedback-msg"></div>
+                <button class="btn" onclick="checkTask(1)">Проверить задание</button>
+                <button class="btn" onclick="nextPage('page-task2')">Следующее задание</button>
+                <div class="teacher-emoji">👩🏻‍🏫</div>
+            </div>
+
+            <div id="page-task2" class="task-section">
+                <h2 class="task-title">Задание 2. Тема: «Сочетательное свойство умножения»</h2>
+                <div class="task-content">
+                    <p>Сгруппируй парами удобные числа, взяв их в скобки. Запиши решение и ответ.</p>
+                    <p>7х5х9х2= <input type="text" class="line-input" id="t2-q1" autocomplete="off"></p>
+                    <p>4х2х1х5х5= <input type="text" class="line-input" id="t2-q2" autocomplete="off"></p>
+                    <p>50х3х2х1х3= <input type="text" class="line-input" id="t2-q3" autocomplete="off"></p>
+                    <p>2х2х3х15х1= <input type="text" class="line-input" id="t2-q4" autocomplete="off"></p>
+                </div>
+                <div id="fb-task2" class="feedback-msg"></div>
+                <button class="btn" onclick="checkTask(2)">Проверить задание</button>
+                <button class="btn" onclick="nextPage('page-task3')">Следующее задание</button>
+                <div class="teacher-emoji">👩🏻‍🏫</div>
+            </div>
+
+            <div id="page-task3" class="task-section">
+                <h2 class="task-title">Задание 3. Тема: «Проверка правильности вычислений разными способами»</h2>
+                <div class="task-content">
+                    <p>Реши выражения и запиши рядом проверку.</p>
+                    <div class="math-row">
+                        <div class="column-calc">
+                            3 9 4<br>+ 2 0 9
+                            <div class="calc-line"></div>
+                            <input type="text" class="calc-input" id="t3-a1" autocomplete="off">
+                        </div>
+                        <div class="check-block">
+                            <span class="check-label">Проверка:</span>
+                            <div class="column-calc">
+                                <input type="text" class="calc-input" id="t3-c1-1" autocomplete="off">
+                                <input type="text" class="calc-input" id="t3-c1-2" autocomplete="off">
+                                <div class="calc-line"></div>
+                                <input type="text" class="calc-input" id="t3-c1-3" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="math-row">
+                        <div class="column-calc">
+                            9 0 0<br>- 2 9 3
+                            <div class="calc-line"></div>
+                            <input type="text" class="calc-input" id="t3-a2" autocomplete="off">
+                        </div>
+                        <div class="check-block">
+                            <span class="check-label">Проверка:</span>
+                            <div class="column-calc">
+                                <input type="text" class="calc-input" id="t3-c2-1" autocomplete="off">
+                                <input type="text" class="calc-input" id="t3-c2-2" autocomplete="off">
+                                <div class="calc-line"></div>
+                                <input type="text" class="calc-input" id="t3-c2-3" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="math-row">
+                        <div class="column-calc">
+                            6 5 7<br>+ 2 1 6
+                            <div class="calc-line"></div>
+                            <input type="text" class="calc-input" id="t3-a3" autocomplete="off">
+                        </div>
+                        <div class="check-block">
+                            <span class="check-label">Проверка:</span>
+                            <div class="column-calc">
+                                <input type="text" class="calc-input" id="t3-c3-1" autocomplete="off">
+                                <input type="text" class="calc-input" id="t3-c3-2" autocomplete="off">
+                                <div class="calc-line"></div>
+                                <input type="text" class="calc-input" id="t3-c3-3" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="math-row">
+                        <div class="column-calc">
+                            7 1 0<br>- 4 4 4
+                            <div class="calc-line"></div>
+                            <input type="text" class="calc-input" id="t3-a4" autocomplete="off">
+                        </div>
+                        <div class="check-block">
+                            <span class="check-label">Проверка:</span>
+                            <div class="column-calc">
+                                <input type="text" class="calc-input" id="t3-c4-1" autocomplete="off">
+                                <input type="text" class="calc-input" id="t3-c4-2" autocomplete="off">
+                                <div class="calc-line"></div>
+                                <input type="text" class="calc-input" id="t3-c4-3" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="fb-task3" class="feedback-msg"></div>
+                <button class="btn" onclick="checkTask(3)">Проверить задание</button>
+                <button class="btn" onclick="nextPage('page-task4')">Следующее задание</button>
+                <div class="teacher-emoji">👩🏻‍🏫</div>
+            </div>
+
+            <div id="page-task4" class="task-section">
+                <h2 class="task-title">Задание 4. Тема: «Таблица умножения и деления»</h2>
+                <div class="task-content">
+                    <p>Вычисли.</p>
+                    <div class="task4-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px 10px; font-family: Arial, sans-serif; font-weight: bold; color: #3e2723; font-size: clamp(22px, 3vw, 28px);">
+                        <p>7х7=<input type="text" class="line-input line-input-short" id="t4-q1" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>4х7=<input type="text" class="line-input line-input-short" id="t4-q2" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>25:5=<input type="text" class="line-input line-input-short" id="t4-q3" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>72:9=<input type="text" class="line-input line-input-short" id="t4-q4" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>36:4=<input type="text" class="line-input line-input-short" id="t4-q5" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>9х3=<input type="text" class="line-input line-input-short" id="t4-q6" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>6х7=<input type="text" class="line-input line-input-short" id="t4-q7" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>8х3=<input type="text" class="line-input line-input-short" id="t4-q8" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>81:9=<input type="text" class="line-input line-input-short" id="t4-q9" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>54:9=<input type="text" class="line-input line-input-short" id="t4-q10" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>21:7=<input type="text" class="line-input line-input-short" id="t4-q11" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>7х10=<input type="text" class="line-input line-input-short" id="t4-q12" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>8х8=<input type="text" class="line-input line-input-short" id="t4-q13" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>5х9=<input type="text" class="line-input line-input-short" id="t4-q14" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>60:6=<input type="text" class="line-input line-input-short" id="t4-q15" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>24:4=<input type="text" class="line-input line-input-short" id="t4-q16" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>18:6=<input type="text" class="line-input line-input-short" id="t4-q17" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                        <p>5х7=<input type="text" class="line-input line-input-short" id="t4-q18" autocomplete="off" style="font-size: clamp(22px, 3vw, 28px);"></p>
+                    </div>
+                </div>
+                <div id="fb-task4" class="feedback-msg"></div>
+                <button class="btn" onclick="checkTask(4)">Проверить задание</button>
+                <button class="btn" onclick="nextPage('page-task5')">Следующее задание</button>
+                <div class="teacher-emoji">👩🏻‍🏫</div>
+            </div>
+
+            <div id="page-task5" class="task-section">
+                <h2 class="task-title">Задание 5. Тема: «Порядок действий в выражении»</h2>
+                <div class="task-content">
+                    <p>Расставь порядок действий над выражениями и вычисли их значения.</p>
+                    <div class="expr-container">
+                        <span>(6</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o1-1" maxlength="1"><span class="op-symbol">х</span></span>
+                        <span>3</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o1-2" maxlength="1"><span class="op-symbol">х</span></span>
+                        <span>5)</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o1-3" maxlength="1"><span class="op-symbol">+</span></span>
+                        <span>398 = </span>
+                        <input type="text" class="line-input line-input-short" id="t5-q1" autocomplete="off">
+                    </div><br>
+                    <div class="expr-container">
+                        <span>(9</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o2-1" maxlength="1"><span class="op-symbol">х</span></span>
+                        <span>0</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o2-2" maxlength="1"><span class="op-symbol">х</span></span>
+                        <span>8</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o2-3" maxlength="1"><span class="op-symbol">х</span></span>
+                        <span>7)</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o2-4" maxlength="1"><span class="op-symbol">+</span></span>
+                        <span>(1</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o2-5" maxlength="1"><span class="op-symbol">х</span></span>
+                        <span>9</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o2-6" maxlength="1"><span class="op-symbol">х</span></span>
+                        <span>2</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o2-7" maxlength="1"><span class="op-symbol">х</span></span>
+                        <span>2</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o2-8" maxlength="1"><span class="op-symbol">х</span></span>
+                        <span>2) = </span>
+                        <input type="text" class="line-input line-input-short" id="t5-q2" autocomplete="off">
+                    </div><br>
+                    <div class="expr-container">
+                        <span>900</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o3-1" maxlength="1"><span class="op-symbol">–</span></span>
+                        <span>(4</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o3-2" maxlength="1"><span class="op-symbol">х</span></span>
+                        <span>3</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o3-3" maxlength="1"><span class="op-symbol">х</span></span>
+                        <span>5) = </span>
+                        <input type="text" class="line-input line-input-short" id="t5-q3" autocomplete="off">
+                    </div><br>
+                    <div class="expr-container">
+                        <span>(7</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o4-1" maxlength="1"><span class="op-symbol">х</span></span>
+                        <span>2</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o4-2" maxlength="1"><span class="op-symbol">х</span></span>
+                        <span>4)</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o4-3" maxlength="1"><span class="op-symbol">–</span></span>
+                        <span>(6</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o4-4" maxlength="1"><span class="op-symbol">х</span></span>
+                        <span>2</span>
+                        <span class="op-group"><input type="text" class="order-box" id="t5-o4-5" maxlength="1"><span class="op-symbol">х</span></span>
+                        <span>4) = </span>
+                        <input type="text" class="line-input line-input-short" id="t5-q4" autocomplete="off">
+                    </div>
+                </div>
+                <div id="fb-task5" class="feedback-msg"></div>
+                <button class="btn" onclick="checkTask(5)">Проверить задание</button>
+                <button class="btn" onclick="nextPage('page-task6')">Следующее задание</button>
+                <div class="teacher-emoji">👩🏻‍🏫</div>
+            </div>
+
+            <div id="page-task6" class="task-section">
+                <h2 class="task-title">Задание 6. Тема: «Периметр многоугольника»</h2>
+                <div class="task-content">
+                    <p>Длина стороны прямоугольника 6 см, а ширина в 2 раза больше. Вычисли его периметр. Запиши решение с пояснениями.</p>
+                    <p>Решение:<textarea id="t6-solution" autocomplete="off" style="width: 100%; min-height: 100px; border: 2px solid #d9c8a9; border-radius: 4px; padding: 8px; font-family: Arial; font-weight: bold; color: #3e2723; font-size: clamp(16px, 2vw, 22px);"></textarea></p>
+                    <p>Ответ: <input type="text" class="line-input" id="t6-answer" autocomplete="off" style="width: 200px; text-align: left; font-size: clamp(16px, 2vw, 22px);"></p>
+                </div>
+                <div id="fb-task6" class="feedback-msg"></div>
+                <button class="btn" onclick="checkTask(6)">Проверить задание</button>
+                <button class="btn" onclick="nextPage('page-task7')">Следующее задание</button>
+                <div class="teacher-emoji">👩🏻‍🏫</div>
+            </div>
+
+            <div id="page-task7" class="task-section">
+                <h2 class="task-title">Задание 7. Тема: «Устные приёмы сложения и вычитания многозначных чисел»</h2>
+                <div class="task-content">
+                    <p>Найди закономерность и запиши следующие 3 числа:</p>
+                    <p style="font-size: clamp(16px, 2vw, 20px); font-weight: bold; color: #3e2723; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
+                        а) 995, 997, 999,
+                        <input type="text" class="line-input line-input-short" id="t7-q1a" autocomplete="off">,
+                        <input type="text" class="line-input line-input-short" id="t7-q1b" autocomplete="off">,
+                        <input type="text" class="line-input line-input-short" id="t7-q1c" autocomplete="off">.
+                    </p>
+                    <p style="font-size: clamp(16px, 2vw, 20px); font-weight: bold; color: #3e2723; margin-top: 15px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
+                        б) 808, 805, 802,
+                        <input type="text" class="line-input line-input-short" id="t7-q2a" autocomplete="off">,
+                        <input type="text" class="line-input line-input-short" id="t7-q2b" autocomplete="off">,
+                        <input type="text" class="line-input line-input-short" id="t7-q2c" autocomplete="off">.
+                    </p>
+                </div>
+                <div id="fb-task7" class="feedback-msg"></div>
+                <button class="btn" onclick="checkTask(7)">Проверить задание</button>
+                <button class="btn" onclick="nextPage('page-task8')">Следующее задание</button>
+                <div class="teacher-emoji">👩🏻‍🏫</div>
+            </div>
+
+            <div id="page-task8" class="task-section">
+                <h2 class="task-title">Задание 8. Тема: «Решение задач разного вида»</h2>
+                <div class="task-content">
+                    <p>Составь выражение со скобками по тексту задачи и реши её.</p>
+                    <p>В спортивном зале стоят 2 ряда скамеек. В каждом ряду — 3 скамейки. На каждой скамейке могут сидеть 4 ученика. А на уроке одновременно занимаются 5 таких групп. Сколько всего учеников могут заниматься в зале?</p>
+                    <p>Решение: <textarea id="t8-solution" autocomplete="off" style="width: 100%; min-height: 100px; border: 2px solid #d9c8a9; border-radius: 4px; padding: 8px; font-family: Arial; font-weight: bold; color: #3e2723; font-size: clamp(16px, 2vw, 22px);"></textarea></p>
+                    <p>Ответ: <input type="text" class="line-input" id="t8-answer" autocomplete="off" style="width: 200px; text-align: left; font-size: clamp(16px, 2vw, 22px);"></p>
+                </div>
+                <div id="fb-task8" class="feedback-msg"></div>
+                <button class="btn" onclick="checkTask(8)">Проверить задание</button>
+                <button class="btn" onclick="showResults()">Далее</button>
+                <div class="teacher-emoji">👩🏻‍🏫</div>
+            </div>
+
+            <div id="page-results" class="task-section">
+                <h2 class="task-title">Результаты работы</h2>
+                <div class="result-box">
+                    <div class="res-name">Ученик: <span id="res-name"></span></div>
+                    <div class="res-grade-text" id="res-grade"></div>
+                    <div class="res-correct-text" id="res-correct"></div>
+                    <div class="res-correct-text" style="color: #3e2723; font-size: 18px;">Ошибок: <span id="res-errors"></span></div>
+                    <p class="res-motivation-text" id="res-motivation"></p>
+                    <button class="btn" id="btn-finish" onclick="finishWork()">Завершить работу</button>
+                    <p class="final-warning">Не забудь нажать на кнопку «Завершить работу!»</p>
+                </div>
+                <div class="teacher-emoji">👩🏻‍🏫</div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzuwWXV6U9BYTSyCVRB0iUasLmgMl8EaflfC8LUIjMXLKy5vOoIq0fm3fWabkjPL0b/exec';
+
+        (function() {
+            const hourHand = document.getElementById('hour-hand');
+            const minuteHand = document.getElementById('minute-hand');
+            const secondHand = document.getElementById('second-hand');
+            const clockOverlay = document.getElementById('clock-overlay');
+            const question = document.getElementById('time-question');
+            let isPaused = false;
+            let pauseStartTime = 0;
+            let totalPausedDuration = 0;
+            const initialTotalSeconds = 10 * 3600 + 10 * 60 + 30;
+            const clockStartTimestamp = Date.now() - initialTotalSeconds * 1000;
+            function updateClock() {
+                if (!isPaused) {
+                    const now = Date.now();
+                    const elapsedSeconds = (now - clockStartTimestamp - totalPausedDuration) / 1000;
+                    const sec = elapsedSeconds % 60;
+                    const min = (elapsedSeconds * 30.0 / 60) % 60;
+                    const hour = (elapsedSeconds / 3600) % 12;
+                    const secDeg = sec * 6;
+                    const minDeg = min * 6;
+                    const hourDeg = hour * 30;
+                    if (secondHand) secondHand.style.transform = `translateX(-50%) rotate(${secDeg}deg)`;
+                    if (minuteHand) minuteHand.style.transform = `translateX(-50%) rotate(${minDeg}deg)`;
+                    if (hourHand) hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+                }
+                requestAnimationFrame(updateClock);
+            }
+            function toggleClock() {
+                if (isPaused) {
+                    totalPausedDuration += (Date.now() - pauseStartTime);
+                    isPaused = false;
+                    if (question) question.classList.remove('show');
+                } else {
+                    pauseStartTime = Date.now();
+                    isPaused = true;
+                    if (question) question.classList.add('show');
+                }
+            }
+            if (clockOverlay) {
+                clockOverlay.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleClock();
+                });
+            }
+            requestAnimationFrame(updateClock);
+        })();
+
+        let studentName = "";
+        let currentTask = 0;
+        let errorsCount = 0;
+        let firstAttemptCorrect = new Array(9).fill(false);
+        let taskChecked = new Array(9).fill(false);
+
+        function playWinSound() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            const now = ctx.currentTime;
+            osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.setValueAtTime(659.25, now + 0.1);
+            osc.frequency.setValueAtTime(783.99, now + 0.2);
+            osc.frequency.setValueAtTime(1046.50, now + 0.3);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.6);
+        }
+
+        function startWork() {
+            const nameInput = document.getElementById('student-name');
+            const nameError = document.getElementById('name-error');
+            const val = nameInput.value.trim();
+            if (!val) { nameError.textContent = "Напиши полную фамилию, имя"; return; }
+            const parts = val.split(/[\s,]+/).filter(p => p.length > 0);
+            if (parts.length < 2) { nameError.textContent = "Напиши полную фамилию, имя"; return; }
+            studentName = val;
+            nextPage('page-task1');
+        }
+
+        function canProceed(taskNum) {
+            let isEmpty = false;
+            if (taskNum === 1) isEmpty = !document.getElementById('t1-q1').value.trim() || !document.getElementById('t1-q4').value.trim();
+            if (taskNum === 2) isEmpty = !document.getElementById('t2-q1').value.trim() || !document.getElementById('t2-q4').value.trim();
+            if (taskNum === 3) isEmpty = !document.getElementById('t3-a1').value.trim() || !document.getElementById('t3-c4-3').value.trim();
+            if (taskNum === 4) { for(let i=1; i<=18; i++) if(!document.getElementById(`t4-q${i}`).value.trim()) isEmpty = true; }
+            if (taskNum === 5) isEmpty = !document.getElementById('t5-q1').value.trim() || !document.getElementById('t5-q4').value.trim();
+            if (taskNum === 6) isEmpty = !document.getElementById('t6-solution').value.trim() || !document.getElementById('t6-answer').value.trim();
+            if (taskNum === 7) isEmpty = !document.getElementById('t7-q1a').value.trim() || !document.getElementById('t7-q2c').value.trim();
+            if (taskNum === 8) isEmpty = !document.getElementById('t8-solution').value.trim() || !document.getElementById('t8-answer').value.trim();
+            return !isEmpty;
+        }
+
+        function nextPage(pageId) {
+            if (currentTask > 0 && currentTask < 9) {
+                if (!canProceed(currentTask)) {
+                    const fb = document.getElementById('fb-task' + currentTask);
+                    if(fb) { fb.textContent = "Выполни задание!"; fb.className = "feedback-msg error"; }
+                    return;
+                }
+            }
+            document.querySelectorAll('.task-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            if (pageId.startsWith('page-task')) { currentTask = parseInt(pageId.replace('page-task', '')); }
+        }
+
+        function updateProgress() {
+            let correctCount = 0;
+            for (let i = 1; i <= 8; i++) { if (firstAttemptCorrect[i]) correctCount++; }
+            document.getElementById('progress-count').textContent = correctCount;
+            document.getElementById('progress-fill').style.width = (correctCount / 8 * 100) + '%';
+        }
+
+        function checkTask(taskNum) {
+            let result;
+            let feedbackEl = document.getElementById('fb-task' + taskNum);
+            feedbackEl.textContent = "";
+            feedbackEl.className = "feedback-msg";
+
+            if (taskNum === 5) {
+                result = checkTask5();
+            } else if (taskNum === 6) {
+                result = specificCheck6();
+            } else if (taskNum === 8) {
+                result = specificCheck8();
+            } else {
+                let isCorrect = false;
+                switch(taskNum) {
+                    case 1: isCorrect = checkTask1(); break;
+                    case 2: isCorrect = checkTask2(); break;
+                    case 3: isCorrect = checkTask3(); break;
+                    case 4: isCorrect = checkTask4(); break;
+                    case 7: isCorrect = checkTask7(); break;
+                }
+                result = { correct: isCorrect, msg: isCorrect ? "Верно! Молодец!" : "Ошибка! Решай вдумчиво!" };
+            }
+
+            if (result.correct) {
+                feedbackEl.textContent = result.msg;
+                feedbackEl.classList.add('success');
+                playWinSound();
+                if (!taskChecked[taskNum]) {
+                    firstAttemptCorrect[taskNum] = true;
+                    taskChecked[taskNum] = true;
+                    updateProgress();
+                }
+            } else {
+                feedbackEl.textContent = result.msg;
+                feedbackEl.classList.add('error');
+                if (!taskChecked[taskNum]) {
+                    taskChecked[taskNum] = true;
+                    errorsCount++;
+                }
+            }
+        }
+
+        function checkTask1() {
+            const q1 = document.getElementById('t1-q1').value;
+            const q2 = document.getElementById('t1-q2').value;
+            const q3 = document.getElementById('t1-q3').value;
+            const q4 = document.getElementById('t1-q4').value;
+            const hasParens = (str) => str.includes('(') || str.includes('[');
+            const hasAns = (str, ans) => {
+                const clean = str.replace(/\s/g, '').replace(/х|x/g, '*').replace(/=/g, '');
+                return clean.includes(ans.toString());
+            };
+            return hasParens(q1) && hasAns(q1, 796) &&
+                   hasParens(q2) && hasAns(q2, 800) &&
+                   hasParens(q3) && hasAns(q3, 856) &&
+                   hasParens(q4) && hasAns(q4, 507);
+        }
+
+        function checkTask2() {
+            const q1 = document.getElementById('t2-q1').value;
+            const q2 = document.getElementById('t2-q2').value;
+            const q3 = document.getElementById('t2-q3').value;
+            const q4 = document.getElementById('t2-q4').value;
+            const hasParens = (str) => str.includes('(') || str.includes('[');
+            const hasAns = (str, ans) => {
+                const clean = str.replace(/\s/g, '').replace(/х|x/g, '*').replace(/=/g, '');
+                return clean.includes(ans.toString());
+            };
+            return hasParens(q1) && hasAns(q1, 630) &&
+                   hasParens(q2) && hasAns(q2, 200) &&
+                   hasParens(q3) && hasAns(q3, 900) &&
+                   hasParens(q4) && hasAns(q4, 180);
+        }
+
+        function checkTask3() {
+            const a1 = document.getElementById('t3-a1').value.trim();
+            const a2 = document.getElementById('t3-a2').value.trim();
+            const a3 = document.getElementById('t3-a3').value.trim();
+            const a4 = document.getElementById('t3-a4').value.trim();
+            return a1.includes('603') && a2.includes('607') && a3.includes('873') && a4.includes('266') &&
+                   document.getElementById('t3-c1-3').value.trim().length > 0 &&
+                   document.getElementById('t3-c2-3').value.trim().length > 0 &&
+                   document.getElementById('t3-c3-3').value.trim().length > 0 &&
+                   document.getElementById('t3-c4-3').value.trim().length > 0;
+        }
+
+        function checkTask4() {
+            const answers = [49, 28, 5, 8, 9, 27, 42, 24, 9, 6, 3, 70, 64, 45, 10, 6, 3, 35];
+            let allCorrect = true;
+            for(let i=0; i<18; i++) {
+                const val = document.getElementById(`t4-q${i+1}`).value.trim().replace(/х|x/g, '*').replace(/:/g, '/');
+                if(val !== answers[i].toString()) allCorrect = false;
+            }
+            return allCorrect;
+        }
+
+        function checkTask5() {
+            const orderBoxes = [
+                't5-o1-1', 't5-o1-2', 't5-o1-3',
+                't5-o2-1', 't5-o2-2', 't5-o2-3', 't5-o2-4', 't5-o2-5', 't5-o2-6', 't5-o2-7', 't5-o2-8',
+                't5-o3-1', 't5-o3-2', 't5-o3-3',
+                't5-o4-1', 't5-o4-2', 't5-o4-3', 't5-o4-4', 't5-o4-5'
+            ];
+            let allOrderFilled = true;
+            for (let id of orderBoxes) {
+                if (!document.getElementById(id).value.trim()) {
+                    allOrderFilled = false;
+                    break;
+                }
+            }
+            if (!allOrderFilled) {
+                return { correct: false, msg: "Ошибка. Не расставлен порядок действий над выражениями!" };
+            }
+
+            const q1 = document.getElementById('t5-q1').value.trim().replace(/\s/g, '');
+            const q2 = document.getElementById('t5-q2').value.trim().replace(/\s/g, '');
+            const q3 = document.getElementById('t5-q3').value.trim().replace(/\s/g, '');
+            const q4 = document.getElementById('t5-q4').value.trim().replace(/\s/g, '');
+
+            if (q1.includes('488') && q2.includes('72') && q3.includes('840') && q4.includes('8')) {
+                return { correct: true, msg: "Верно! Молодец!" };
+            }
+            return { correct: false, msg: "Ошибка! Решай вдумчиво!" };
+        }
+
+        function specificCheck6() {
+            const rawSol = document.getElementById('t6-solution').value;
+            const sol = rawSol.toLowerCase().replace(/\s/g, '').replace(/х|x/g, '*');
+            const ans = document.getElementById('t6-answer').value.toLowerCase().replace(/\s/g, '');
+
+            if (!ans.includes('36')) {
+                return { correct: false, msg: "Ошибка в ответе!" };
+            }
+            if (ans.includes('мм')) {
+                return { correct: false, msg: "Ошибка в единицах измерения!" };
+            }
+
+            if (!/[а-яё]/i.test(rawSol)) {
+                return { correct: false, msg: "Ошибка. Нет пояснений к действиям задачи!" };
+            }
+
+            const hasWidthWord = /ширин/i.test(rawSol);
+            const hasPerimeterWord = /периметр/i.test(rawSol);
+            if (!hasWidthWord && !hasPerimeterWord) {
+                return { correct: false, msg: "Ошибка. Нет пояснений к действиям задачи!" };
+            }
+
+            if (!/см/i.test(rawSol) && !/см/i.test(ans)) {
+                return { correct: false, msg: "Не указаны сантиметры (см)!" };
+            }
+
+            if (/2\s*[\*хx]\s*6/i.test(rawSol)) {
+                return { correct: false, msg: "Ошибка! Ширина находится умножением 6х2, а не 2х6!" };
+            }
+
+            const hasFirstAction = /6\s*[\*хx]\s*2\s*=\s*12/i.test(rawSol);
+            if (!hasFirstAction) {
+                return { correct: false, msg: "Ошибка в первом действии!" };
+            }
+
+            const hasSecondAction = /36/i.test(sol);
+            if (!hasSecondAction) {
+                return { correct: false, msg: "Ошибка во втором действии!" };
+            }
+
+            return { correct: true, msg: "Верно! Молодец!" };
+        }
+
+        function checkTask7() {
+            const q1a = document.getElementById('t7-q1a').value.trim().replace(/\s/g, '');
+            const q1b = document.getElementById('t7-q1b').value.trim().replace(/\s/g, '');
+            const q1c = document.getElementById('t7-q1c').value.trim().replace(/\s/g, '');
+            const q2a = document.getElementById('t7-q2a').value.trim().replace(/\s/g, '');
+            const q2b = document.getElementById('t7-q2b').value.trim().replace(/\s/g, '');
+            const q2c = document.getElementById('t7-q2c').value.trim().replace(/\s/g, '');
+            return q1a.includes('1001') && q1b.includes('1003') && q1c.includes('1005') &&
+                   q2a.includes('799') && q2b.includes('796') && q2c.includes('793');
+        }
+
+        // ИСПРАВЛЕНИЕ: Полностью переписана функция проверки Задания 8
+        // Теперь строго проверяется наличие скобок именно в выражении умножения
+        function specificCheck8() {
+            const rawSol = document.getElementById('t8-solution').value;
+            const sol = rawSol.toLowerCase().replace(/\s/g, '').replace(/х|x|×/g, '*');
+            const ans = document.getElementById('t8-answer').value.toLowerCase().replace(/\s/g, '');
+
+            // 1. Проверка наличия пояснений (кириллические буквы)
+            if (!/[а-яё]/i.test(rawSol) || rawSol.length < 15) {
+                return { correct: false, msg: "Нет пояснений к действиям задачи!" };
+            }
+
+            // 2. Проверка наличия скобок ИМЕННО в выражении умножения
+            // Регулярка ищет скобки, внутри которых есть умножение двух однозначных чисел
+            // Это соответствует всем правильным вариантам: (2*5), (3*4), (5*2), (4*3), (5*4), (2*3)
+            const hasParensAroundMultiplication = /\(\s*\d\s*[*]\s*\d\s*\)/.test(sol);
+            
+            if (!hasParensAroundMultiplication) {
+                return { correct: false, msg: "Нарушена инструкция к задаче - нет скобок в выражении!" };
+            }
+
+            // 3. Проверка правильного ответа: 120
+            if (!ans.includes('120')) {
+                return { correct: false, msg: "Ошибка в ответе!" };
+            }
+
+            // 4. Проверка наличия всех нужных чисел из задачи (2, 3, 4, 5)
+            const hasStructure = sol.includes('2') && sol.includes('3') && 
+                                 sol.includes('4') && sol.includes('5');
+
+            if (!hasStructure) {
+                return { correct: false, msg: "Ошибка в записи решения!" };
+            }
+
+            return { correct: true, msg: "Верно! Молодец!" };
+        }
+
+        let workFinished = false;
+
+        function showResults() {
+            if (!canProceed(8)) {
+                const fb = document.getElementById('fb-task8');
+                fb.textContent = "Выполни задание!";
+                fb.className = "feedback-msg error";
+                return;
+            }
+            nextPage('page-results');
+            let correct = 0;
+            for(let i=1; i<=8; i++) if(firstAttemptCorrect[i]) correct++;
+            const errors = 8 - correct;
+            document.getElementById('res-name').textContent = studentName;
+            document.getElementById('res-correct').textContent = `Верно: ${correct} из 8 заданий`;
+            document.getElementById('res-errors').textContent = errors;
+            let grade = 2;
+            let motivation = "";
+            if (errors === 0) {
+                grade = 5;
+                motivation = "Отличная работа! Высокий уровень знаний!";
+                startConfetti();
+            } else if (errors <= 2) {
+                grade = 4;
+                motivation = "Хорошо! Но ты можешь лучше!";
+            } else if (errors <= 5) {
+                grade = 3;
+                motivation = "Уровень знаний средний. Надо ещё упорно тренироваться!";
+            } else {
+                grade = 2;
+                motivation = "Очень плохо! Запомни: упорные тренировки достигнут высоких результатов! Заставь себя тренироваться!";
+            }
+            document.getElementById('res-grade').textContent = `Оценка ${grade}`;
+            document.getElementById('res-motivation').textContent = motivation;
+        }
+
+        function finishWork() {
+            if (workFinished) return;
+            workFinished = true;
+            const btn = document.getElementById('btn-finish');
+            btn.disabled = true;
+
+            let correct = 0;
+            for(let i=1; i<=8; i++) if(firstAttemptCorrect[i]) correct++;
+            const errors = 8 - correct;
+            let gradeText = document.getElementById('res-grade').textContent.replace('Оценка ', '');
+            const data = {
+                name: studentName,
+                correct: correct,
+                total: 8,
+                errors: errors,
+                grade: gradeText
+            };
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(() => {
+                console.log("Данные успешно отправлены в Google Sheets");
+            }).catch(err => console.error("Ошибка отправки:", err));
+        }
+
+        function startConfetti() {
+            const container = document.getElementById('confetti-layer');
+            if (!container) return;
+            container.innerHTML = '';
+            const flowers = ['🌸', '🌺', '🌻', '🌼', '🌷', '💐', '🌹'];
+            for (let i = 0; i < 50; i++) {
+                const el = document.createElement('div');
+                el.classList.add('flower-particle');
+                el.textContent = flowers[Math.floor(Math.random() * flowers.length)];
+                el.style.left = Math.random() * 100 + '%';
+                el.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                el.style.animationDelay = (Math.random() * 3) + 's';
+                el.style.fontSize = (Math.random() * 15 + 20) + 'px';
+                container.appendChild(el);
+            }
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 10000);
+        }
+    </script>
+</body>
+</html>
